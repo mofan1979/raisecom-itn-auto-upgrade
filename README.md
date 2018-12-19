@@ -15,4 +15,9 @@
 程序需要支持高并发下载，推荐使用FileZilla server服务器程序。
 8. 升级规则可以指定升级前、升级成功后擦除旧版本文件，当然新版本文件名不能用同样的名字，否则会被误擦除！
 
-测试64进程并发升级170台iTN331设备只需要28分钟左右。
+- 测试64进程并发升级170台iTN331设备只需要28分钟左右。
+![](https://github.com/mofan1979/raisecom-itn-auto-upgrade/blob/master/%E5%8D%87%E7%BA%A7170%E5%8F%B0%E8%AE%BE%E5%A4%87%E8%80%97%E6%97%B6%E6%A0%B7%E4%BE%8B.jpg?raw=true）
+
+- 结果由列表文件显示，直观方便统计和后续处理。
+
+![结果演示](https://github.com/mofan1979/raisecom-itn-auto-upgrade/blob/master/170%E5%8F%B0%E5%8D%87%E7%BA%A7%E7%BB%93%E6%9E%9C%E6%A0%B7%E4%BE%8B.jpg?raw=true)
