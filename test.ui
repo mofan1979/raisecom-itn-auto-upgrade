@@ -83,8 +83,26 @@
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>get_rule()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>128</x>
+     <y>52</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>128</x>
+     <y>80</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
  <slots>
   <slot>get_rule()</slot>
+  <slot>get_pool()</slot>
  </slots>
 </ui>
