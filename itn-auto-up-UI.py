@@ -15,7 +15,7 @@ class itn_auto_up(QMainWindow, test.Ui_MainWindow):
         self.setupUi(self)
 
     def get_rule(self):
-        filename, ok = QFileDialog.getOpenFileName(self, '读取规则文件', 'c:/')
+        filename, ok = QFileDialog.getOpenFileName(self, '读取规则文件', 'c:/','*.csv')
         if ok:
             print(filename)
 
