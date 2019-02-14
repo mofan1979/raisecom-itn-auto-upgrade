@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>411</width>
-    <height>112</height>
+    <width>426</width>
+    <height>494</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -79,6 +79,16 @@
      <bool>true</bool>
     </property>
    </widget>
+   <widget class="QPlainTextEdit" name="hosts">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>90</y>
+      <width>291</width>
+      <height>371</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
@@ -100,9 +110,26 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButton_4</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>get_ip()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>56</x>
+     <y>47</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>56</x>
+     <y>87</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>get_rule()</slot>
   <slot>get_pool()</slot>
+  <slot>get_ip()</slot>
  </slots>
 </ui>

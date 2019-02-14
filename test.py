@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(411, 112)
+        MainWindow.resize(426, 494)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.horizontalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
@@ -40,6 +40,9 @@ class Ui_MainWindow(object):
         self.label.setGeometry(QtCore.QRect(200, 10, 101, 31))
         self.label.setWordWrap(True)
         self.label.setObjectName("label")
+        self.hosts = QtWidgets.QPlainTextEdit(self.centralwidget)
+        self.hosts.setGeometry(QtCore.QRect(20, 90, 291, 371))
+        self.hosts.setObjectName("hosts")
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -47,6 +50,7 @@ class Ui_MainWindow(object):
 
         self.retranslateUi(MainWindow)
         self.pushButton.clicked.connect(MainWindow.get_rule)
+        self.pushButton_4.clicked.connect(MainWindow.get_ip)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
