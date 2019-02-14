@@ -17,7 +17,8 @@ class itn_auto_up(QMainWindow, test.Ui_MainWindow):
     def get_rule(self):
         f1, ok = QFileDialog.getOpenFileName(self, '读取规则文件', '', '*.csv')
         if ok:
-            print(f1)
+            # print(f1)
+            self.rule_confirm.setText(f1)
 
     def get_ip(self):
         f2, ok = QFileDialog.getOpenFileName(self, '读取ip列表文件', '', '*.txt')
