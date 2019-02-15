@@ -1,4 +1,4 @@
-from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog
+from PyQt5.QtWidgets import QMainWindow, QApplication, QFileDialog,QMessageBox
 import sys
 import test
 import telnetlib  # 调用telnet方法需要的库
@@ -23,6 +23,11 @@ class itn_auto_up(QMainWindow, test.Ui_MainWindow):
         if ok:
             # print(f1)
             self.rule_confirm.setText(f1)
+        # 判断所有必填项已经填写，开放升级按钮
+        if self.hosts.toPlainText() != '' and self.res_dir.toPlainText() != '' and self.rule_confirm.toPlainText() != '' and self.setpool.text() != '':
+            self.pushButton_3.setEnabled(True)
+        else:
+            self.pushButton_3.setEnabled(False)
 
     def get_ip(self):
         f2, ok = QFileDialog.getOpenFileName(self, '读取ip列表文件', '', '*.txt')
@@ -32,6 +37,27 @@ class itn_auto_up(QMainWindow, test.Ui_MainWindow):
                 # 读取文件
                 my_ip_hosts = f.read()
             self.hosts.setPlainText(my_ip_hosts)
+        # 判断所有必填项已经填写，开放升级按钮
+        if self.hosts.toPlainText() != '' and self.res_dir.toPlainText() != '' and self.rule_confirm.toPlainText() != '' and self.setpool.text() != '':
+            self.pushButton_3.setEnabled(True)
+        else:
+            self.pushButton_3.setEnabled(False)
+
+    def get_res_dir(self):
+        f3 = QFileDialog.getExistingDirectory(self, '设置结果保存目录', '.')
+        self.res_dir.setText(f3)
+        # 判断所有必填项已经填写，开放升级按钮
+        if self.hosts.toPlainText() != '' and self.res_dir.toPlainText() != '' and self.rule_confirm.toPlainText() != '' and self.setpool.text() != '':
+            self.pushButton_3.setEnabled(True)
+        else:
+            self.pushButton_3.setEnabled(False)
+
+    def get_pool(self):
+        # 判断所有必填项已经填写，开放升级按钮
+        if self.hosts.toPlainText() != '' and self.res_dir.toPlainText() != '' and self.rule_confirm.toPlainText() != '' and self.setpool.text() != '':
+            self.pushButton_3.setEnabled(True)
+        else:
+            self.pushButton_3.setEnabled(False)
 
     def update_itn185_331(self, ip, rule):
         # 定义执行升级函数，需要传入参数为设备ip，规则列表矩阵
@@ -227,7 +253,7 @@ class itn_auto_up(QMainWindow, test.Ui_MainWindow):
                                 print('[', t5, ']', ip, devtype, cmd_line, '执行异常或超时，耗时 ', t5 - t4)
                                 return '%s,失败,下载system出错\n' % ip
                             except:
-                                print('[', t8, ']', ip, devtype, '升级system过程telnet连接中断，耗时 ', t5 - t4)
+                                print('[', t5, ']', ip, devtype, '升级system过程telnet连接中断，耗时 ', t5 - t4)
                                 return '%s,失败,telnet连接中断\n' % ip
                     # 升级过程异常处理
                     except:
@@ -259,6 +285,8 @@ class itn_auto_up(QMainWindow, test.Ui_MainWindow):
         # 从rule_confirm控件中取出文件名
         f1 = self.rule_confirm.toPlainText()
         print(f1)
+        if f1 == '':
+            QMessageBox.information(self,"error",)
         # 逐行取出规则，放到列表rule[]中
         rule = []
         try:
@@ -282,21 +310,28 @@ class itn_auto_up(QMainWindow, test.Ui_MainWindow):
             if r[2] != '' and r[4] == '':
                 print('错误！升级规则表第%d行中定义了bootrom目标版本，未定义bootrom升级文件' % index)
                 exit()
-
+        # 读取hosts文本框的内容切片成设备列表，移除空行
+        ip_list = self.hosts.toPlainText().split()
+        for i in ip_list:
+            if i == '':
+                ip_list.remove(i)
         start_time = datetime.now()
-        logfile = 'e:/python/result/%s.csv' % start_time.strftime('%Y%m%d_%H%M%S')
-        # 结果日志存放目录，必须存在/result路径，文件名为格式化日期_时间.csv
+        # 结果日志存路径，文件名为格式化日期_时间.csv
+        my_dir = self.res_dir.toPlainText()
+        logfile = '%s/result%s.csv' % (my_dir, start_time.strftime('%Y%m%d_%H%M%S'))
         try:
             log = open(logfile, mode='a')
         # 日志文件操作错误处理
         except:
             print('错误，结果日志文件存放路径/result不存在')
             exit()
-        # 创建进程池，个数根据PC处理能力适当选择
-        p = Pool(64)
+        # 从setpool文本框控件取出线程数值
+        pool_num = self.setpool.text()
+        # 创建进程池
+        p = Pool(pool_num)
         # 开启多进程异步升级，回调函数记录结果到log文件
         for ip in ip_list:
-            p.apply_async(itn185_331_download_system, args=(ip, rule,), callback=log.write)
+            p.apply_async(self.update_itn185_331, args=(ip, rule,), callback=log.write)
         p.close()
         p.join()
         log.close()

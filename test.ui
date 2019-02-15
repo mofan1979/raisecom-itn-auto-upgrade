@@ -42,7 +42,17 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="text">
+        <string>设置结果保存目录</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="pushButton_3">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>批量升级</string>
        </property>
@@ -63,7 +73,7 @@
    <widget class="QLabel" name="label_2">
     <property name="geometry">
      <rect>
-      <x>340</x>
+      <x>310</x>
       <y>90</y>
       <width>111</width>
       <height>21</height>
@@ -143,6 +153,58 @@
      </item>
     </layout>
    </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>290</y>
+      <width>111</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>结果保存目录：</string>
+    </property>
+   </widget>
+   <widget class="QTextBrowser" name="res_dir">
+    <property name="geometry">
+     <rect>
+      <x>310</x>
+      <y>320</y>
+      <width>351</width>
+      <height>91</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QProgressBar" name="progressBar">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>470</y>
+      <width>331</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="value">
+     <number>0</number>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignCenter</set>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>320</x>
+      <y>440</y>
+      <width>111</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>批量升级进度：</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
@@ -155,12 +217,12 @@
    <slot>get_ip()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>56</x>
-     <y>47</y>
+     <x>57</x>
+     <y>56</y>
     </hint>
     <hint type="destinationlabel">
-     <x>56</x>
-     <y>87</y>
+     <x>126</x>
+     <y>17</y>
     </hint>
    </hints>
   </connection>
@@ -171,12 +233,60 @@
    <slot>get_rule()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>128</x>
-     <y>52</y>
+     <x>291</x>
+     <y>61</y>
     </hint>
     <hint type="destinationlabel">
-     <x>128</x>
-     <y>80</y>
+     <x>260</x>
+     <y>17</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_3</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>multiprocess_update()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>546</x>
+     <y>49</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>553</x>
+     <y>15</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>get_res_dir()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>438</x>
+     <y>49</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>398</x>
+     <y>18</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>setpool</sender>
+   <signal>editingFinished()</signal>
+   <receiver>MainWindow</receiver>
+   <slot>get_pool()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>570</x>
+     <y>255</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>571</x>
+     <y>283</y>
     </hint>
    </hints>
   </connection>
@@ -185,5 +295,7 @@
   <slot>get_rule()</slot>
   <slot>get_pool()</slot>
   <slot>get_ip()</slot>
+  <slot>multiprocess_update()</slot>
+  <slot>get_res_dir()</slot>
  </slots>
 </ui>
