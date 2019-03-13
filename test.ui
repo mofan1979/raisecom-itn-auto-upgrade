@@ -278,7 +278,7 @@
    <sender>setpool</sender>
    <signal>editingFinished()</signal>
    <receiver>MainWindow</receiver>
-   <slot>get_pool()</slot>
+   <slot>get_ready()</slot>
    <hints>
     <hint type="sourcelabel">
      <x>570</x>
@@ -293,7 +293,7 @@
  </connections>
  <slots>
   <slot>get_rule()</slot>
-  <slot>get_pool()</slot>
+  <slot>get_ready()</slot>
   <slot>get_ip()</slot>
   <slot>multiprocess_update()</slot>
   <slot>get_res_dir()</slot>

@@ -24,10 +24,7 @@ class itn_auto_up(QMainWindow, test.Ui_MainWindow):
             # print(f1)
             self.rule_confirm.setText(f1)
         # 判断所有必填项已经填写，开放升级按钮
-        if self.hosts.toPlainText() != '' and self.res_dir.toPlainText() != '' and self.rule_confirm.toPlainText() != '' and self.setpool.text() != '':
-            self.pushButton_3.setEnabled(True)
-        else:
-            self.pushButton_3.setEnabled(False)
+        self.get_ready()
 
     def get_ip(self):
         f2, ok = QFileDialog.getOpenFileName(self, '读取ip列表文件', '', '*.txt')
@@ -38,21 +35,15 @@ class itn_auto_up(QMainWindow, test.Ui_MainWindow):
                 my_ip_hosts = f.read()
             self.hosts.setPlainText(my_ip_hosts)
         # 判断所有必填项已经填写，开放升级按钮
-        if self.hosts.toPlainText() != '' and self.res_dir.toPlainText() != '' and self.rule_confirm.toPlainText() != '' and self.setpool.text() != '':
-            self.pushButton_3.setEnabled(True)
-        else:
-            self.pushButton_3.setEnabled(False)
+        self.get_ready()
 
     def get_res_dir(self):
         f3 = QFileDialog.getExistingDirectory(self, '设置结果保存目录', '.')
         self.res_dir.setText(f3)
         # 判断所有必填项已经填写，开放升级按钮
-        if self.hosts.toPlainText() != '' and self.res_dir.toPlainText() != '' and self.rule_confirm.toPlainText() != '' and self.setpool.text() != '':
-            self.pushButton_3.setEnabled(True)
-        else:
-            self.pushButton_3.setEnabled(False)
+        self.get_ready()
 
-    def get_pool(self):
+    def get_ready(self):
         # 判断所有必填项已经填写，开放升级按钮
         if self.hosts.toPlainText() != '' and self.res_dir.toPlainText() != '' and self.rule_confirm.toPlainText() != '' and self.setpool.text() != '':
             self.pushButton_3.setEnabled(True)

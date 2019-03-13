@@ -89,7 +89,7 @@ class Ui_MainWindow(object):
         self.pushButton.clicked.connect(MainWindow.get_rule)
         self.pushButton_3.clicked.connect(MainWindow.multiprocess_update)
         self.pushButton_2.clicked.connect(MainWindow.get_res_dir)
-        self.setpool.editingFinished.connect(MainWindow.get_pool)
+        self.setpool.editingFinished.connect(MainWindow.get_ready)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
