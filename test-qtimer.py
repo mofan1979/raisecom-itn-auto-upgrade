@@ -18,14 +18,20 @@
 import telnetlib  # 调用telnet方法需要的库
 from datetime import datetime
 from multiprocessing import Pool
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import *
 
 
-def work():
-    print('现在时间是', datetime.now())
+class test(QTimer):
+    def __init__(self, parent=None):
+        super(test, self).__init__(parent)
+        self.timer = QTimer()
+        self.timer.setInterval(1000)
+        self.timer.start()
+        self.timer.timeout.connect(self.work)
+
+    def work(self):
+        print('现在时间是', datetime.now())
 
 
 if __name__ == '__main__':
-    timer = QTimer()
-    timer.start(1000)
-    timer.timeout.connect(work)
+    t = test()
