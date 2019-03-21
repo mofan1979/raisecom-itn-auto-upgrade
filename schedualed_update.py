@@ -24,8 +24,8 @@ from PyQt5.QtWidgets import QApplication
 import sys
 
 
+# 定义执行升级函数，需要传入参数为设备ip，规则列表矩阵
 def itn185_331_download_system(ip, rule):
-    # 定义执行升级函数，需要传入参数为设备ip，规则列表矩阵
     # 尝试发起telnet连接
     t90 = datetime.now()
     try:
@@ -245,9 +245,8 @@ def itn185_331_download_system(ip, rule):
     except:
         print('%s telnet连接失败，非RC设备或设备离线' % ip)
         return '%s,失败,非RC设备或设备离线\n' % ip
-
-
-if __name__ == '__main__':
+# 多进程升级功能函数
+def multiprocess_update():
     # windows的可执行文件，必须添加支持程序冻结，该命令需要在__main__函数下
     # freeze_support()
     f1 = 'e:/python/upgrade_rule.csv'
@@ -296,8 +295,7 @@ if __name__ == '__main__':
     except:
         print('错误，结果日志文件存放路径/result不存在')
         exit()
-    timer = QTimer()
-    timer.start(86400000)
+
     # 创建进程池，个数根据PC处理能力适当选择
     p = Pool(64)
     # 开启多进程异步升级，回调函数记录结果到log文件
@@ -308,3 +306,15 @@ if __name__ == '__main__':
     log.close()
     end_time = datetime.now()
     print(end_time, '批量升级执行完成，共耗时', end_time - start_time)
+
+
+if __name__ == '__main__':
+    # sys.argv指程序运行时接收命令行参数
+    app = QApplication(sys.argv)
+    timer = QTimer()
+    timer.start(86400000)
+    timer.timeout.connect(multiprocess_update)
+    # app.exec_()指程序一直循环运行直到主窗口被关闭退出
+    # sys.exit()反映程序终止的状态码
+    # sys.exit(app.exec_())
+    app.exec_()
