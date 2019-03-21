@@ -20,6 +20,8 @@ from datetime import datetime
 from multiprocessing import Pool
 from time import sleep
 from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QApplication
+import sys
 
 
 def itn185_331_download_system(ip, rule):
@@ -216,7 +218,7 @@ def itn185_331_download_system(ip, rule):
                             print('[', t5, ']', ip, devtype, cmd_line, '执行异常或超时，耗时 ', t5 - t4)
                             return '%s,失败,下载system出错\n' % ip
                         except:
-                            print('[', t8, ']', ip, devtype, '升级system过程telnet连接中断，耗时 ', t5 - t4)
+                            print('[', t5, ']', ip, devtype, '升级system过程telnet连接中断，耗时 ', t5 - t4)
                             return '%s,失败,telnet连接中断\n' % ip
                 # 升级过程异常处理
                 except:
