@@ -1,9 +1,0 @@
-# 文档使用yaml语法
-# 指定升级规则文件路径
-upgrade_rule: 'e:/python/upgrade_rule.csv'
-# 指定升级设备列表文件路径
-u_ip_list: 'e:/python/u_ip_list.txt'
-# 指定升级结果存放目录
-result_dir: 'e:/python/result'
-#指定并发升级进程数
-pool: 64
