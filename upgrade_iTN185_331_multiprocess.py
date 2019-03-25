@@ -12,16 +12,20 @@
 4. 升级时一定要保证itn设备FLASH内存空间足够，否则异常!
 5. 升级设备ip列表放在/u_ip_list.txt供程序读取设备ip，每行一条ip
 6. 升级结果日志放在/result子目录下，文件名为“日期_时间.csv”，如果/result目录不存在，自动创建
-7. 程序为多进程并行升级，需根据PC性能配置决定并发进程池大小Pool（），数量过多会影响稳定性，ftp服务端
-程序需要支持高并发下载，推荐使用FileZilla server服务器程序。
+7. 程序为多进程并行升级，需根据PC性能配置决定并发进程数，数量过多会影响稳定性，ftp服务端程序需要支持
+高并发下载，推荐使用FileZilla server服务器程序。
 8. 升级规则可以指定升级前、升级成功后擦除旧版本文件，当然新版本文件名不能用同样的名字，否则会被误擦除！
+9. 目前不支持paf文件升级
+10. 命令行使用“upgrade_iTN185_331_multiprocess.exe -p P_NUM”可实现无人值守静默升级，P_NUM为并发进程数，P_NUM必须大于等于1小于等于99。
+
 '''
 
+import argparse  # 接收命令行参数的库
+import os
 import telnetlib  # 调用telnet方法需要的库
 from datetime import datetime
 from multiprocessing import Pool, freeze_support
 from time import sleep
-import os
 
 
 def itn185_331_download_system(ip, rule):
@@ -246,7 +250,8 @@ def itn185_331_download_system(ip, rule):
         print('%s telnet连接失败，非RC设备或设备离线' % ip)
         return '%s,失败,非RC设备或设备离线\n' % ip
 
-def multiprocess_update(p_num):
+
+def multiprocess_upgrade(p_num):
     # 获取当前工作目录
     home = os.getcwd()
     # 生成规则文件路径
@@ -314,6 +319,7 @@ def multiprocess_update(p_num):
     end_time = datetime.now()
     print(end_time, '批量升级执行完成，共耗时', end_time - start_time)
 
+
 if __name__ == '__main__':
     # windows的可执行文件，必须添加支持程序冻结，该命令需要在__main__函数下
     freeze_support()
@@ -334,12 +340,25 @@ if __name__ == '__main__':
     7. 程序为多进程并行升级，需根据PC性能配置决定并发进程数，数量过多会影响稳定性，ftp服务端程序需要支持
     高并发下载，推荐使用FileZilla server服务器程序。
     8. 升级规则可以指定升级前、升级成功后擦除旧版本文件，当然新版本文件名不能用同样的名字，否则会被误擦除！
+    9. 目前不支持paf文件升级
+    10. 命令行使用“upgrade_iTN185_331_multiprocess.exe -p P_NUM”可实现无人值守静默升级，P_NUM为并发进程数，P_NUM必须大于等于1小于等于99。
     ''')
-    while True:
-        # 接收控制台输入，input方法获取的是字符串，需要转成整数
-        p_num = int(input('请输入并发进程数，根据PC处理能力适当选择，推荐为CPU数量的整数倍：'))
-        if 0 < p_num < 100:
-            break
-        print("非法数值，请从新输入1到99之间的整数")
-    multiprocess_update(p_num)
-    input('升级完成，升级结果日志放在/result子目录下，文件名为“日期_时间.csv”，按回车退出')
+    # 实例化参数解析器
+    parser = argparse.ArgumentParser()
+    # 增加命令行选项-p
+    parser.add_argument("-p", "--p_num", type=int, choices=range(1, 100))
+    # 解析命令行参数到args类
+    args = parser.parse_args()
+    # 命令行加-p选项，无人值守静默升级
+    if args.p_num != None:
+        multiprocess_upgrade(args.p_num)
+    # 如果命令行不加-p选项，进行交互式升级
+    else:
+        while True:
+            # 接收控制台输入，input方法获取的是字符串，需要转成整数
+            pool = int(input('请输入并发进程数，根据PC处理能力适当选择，推荐为CPU数量的整数倍：'))
+            if 0 < pool < 100:
+                break
+            print("非法数值，请从新输入1到99之间的整数")
+        multiprocess_upgrade(pool)
+        input('升级完成，升级结果日志放在/result子目录下，文件名为“日期_时间.csv”，按回车退出')
