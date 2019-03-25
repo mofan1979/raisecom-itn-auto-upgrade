@@ -351,6 +351,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
     # 命令行加-p选项，无人值守静默升级
     if args.p_num != None:
+        print("进行无人值守静默升级，并发进程数为：", args.p_num)
         multiprocess_upgrade(args.p_num)
     # 如果命令行不加-p选项，进行交互式升级
     else:
