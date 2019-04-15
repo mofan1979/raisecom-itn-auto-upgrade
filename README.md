@@ -13,6 +13,7 @@
 8. 升级规则可以指定升级前、升级成功后擦除旧版本文件，当然新版本文件名不能用同样的名字，否则会被误擦除！
 9. 目前不支持paf文件升级
 10. 命令行使用“upgrade_iTN185_331_multiprocess.exe -p P_NUM”可实现无人值守静默升级，P_NUM为并发进程数，P_NUM必须大于等于1小于等于99。
+11. 如果windows环境运行提示缺少API-MS-Win-Core-Console-L1-1-0.dll运行库，请下载安装[微软常用运行库合集](http://baoku.360.cn/soft/show/appid/104698064)
 
 - 测试64进程并发升级170台iTN331设备只需要28分钟左右。
 ![效率演示](https://github.com/mofan1979/raisecom-itn-auto-upgrade/blob/master/%E5%8D%87%E7%BA%A7170%E5%8F%B0%E8%AE%BE%E5%A4%87%E8%80%97%E6%97%B6%E6%A0%B7%E4%BE%8B.jpg?raw=true)
