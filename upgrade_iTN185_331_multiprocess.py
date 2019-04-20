@@ -1,8 +1,8 @@
-'''
-- ITN185_331批量升级工具v1.2说明
+"""
+- ITN185_331批量升级工具v1.3说明
 - 编写人：莫凡 500264@qq.com
 - 鸣谢：冀文超 提供源代码思路
-- 版本日期：20190325
+- 版本日期：20190420
 - 说明：
 1. 本脚本用于台式IPRAN设备的自动一键升级，用户不需检查待升级设备类型，脚本会自动搜索匹配升级规则，如果匹配不到规则，会报错并继续匹配下一台;
 2. 升级规则通过/upgrade_rule.csv定制。包括匹配设备类型、硬件版本、指定目标bootrom版本和文件、指定目标system版本和文件、是否备份配置、ftp下载账号、是否重启激活等。每种设备一行，详见具体文件。
@@ -14,7 +14,7 @@
 8. 升级规则可以指定升级前、升级成功后擦除旧版本文件，当然新版本文件名不能用同样的名字，否则会被误擦除！
 9. 目前不支持paf文件升级
 10. 命令行使用“upgrade_iTN185_331_multiprocess.exe -p P_NUM”可实现无人值守静默升级，P_NUM为并发进程数，P_NUM必须大于等于1小于等于99。
-'''
+"""
 
 import argparse  # 接收命令行参数的库
 import os
@@ -32,29 +32,28 @@ def itn185_331_download_system(ip, rule):
         tn = telnetlib.Telnet(ip.encode(), port=23, timeout=3)
         # 登陆交互
         tn.write('\n'.encode())
-        tn.read_until(b'Login:')
+        tn.read_until(b'Login:', timeout=2)
         tn.write('raisecom\n'.encode())
-        tn.read_until(b'Password:')
+        tn.read_until(b'Password:', timeout=1)
         tn.write('raisecom\n'.encode())
-        tn.read_until(b'>')
+        tn.read_until(b'>', timeout=1)
         tn.write('enable\n'.encode())
-        tn.read_until(b'Password:')
+        tn.read_until(b'Password:', timeout=1)
         tn.write('raisecom\n'.encode())
-        tn.read_until(b'#')
+        tn.read_until(b'#', timeout=1)
         tn.write('show version\n'.encode())  # 读取设备版本
-        devinfo = tn.read_until(b'#').decode()  # 解码成Unicode格式以供比对
+        devinfo = tn.read_until(b'#', timeout=2).decode(errors='ignore')  # 解码成Unicode格式以供比对
         # print(devinfo)
         # 逐行比对升级规则
         for r in rule:
             ftp_host = r[9]
             ftp_user = r[10]
             ftp_pw = r[11]
-            if devinfo.find('Product Name: %s' % r[0]) >= 0 and devinfo.find('Hardware Version: %s' % r[1]) >= 0:
+            if 'Product Name: %s' % r[0] in devinfo and 'Hardware Version: %s' % r[1] in devinfo:
                 # 匹配设备型号和硬件版本成功
                 devtype = r[0] + ':' + r[1]
                 print(ip, '升级的设备类型是', devtype)
-                # print(devinfo.find(r[3]))
-                if devinfo.find(r[3]) >= 0:
+                if r[3] in devinfo:
                     print(ip, '恭喜，设备system版本已经是最新，无需升级')
                     return '%s,成功,无需升级\n' % ip
                 # 下载升级包
@@ -66,13 +65,13 @@ def itn185_331_download_system(ip, rule):
                         cmd_line = 'write\n'
                         print('[', t0, ']', ip, devtype, '执行', cmd_line)
                         tn.write(cmd_line.encode())
-                        tn.read_until(b'#')
+                        tn.read_until(b'#', timeout=5)
                         ft0 = t0.strftime('%Y%m%d_%H%M%S')
                         cmd_line = 'upload startup-config ftp %s %s %s %s-%s.conf\n' % (
                             ftp_host, ftp_user, ftp_pw, ip, ft0)
                         print('[', datetime.now(), ']', ip, devtype, '执行', cmd_line)
                         tn.write(cmd_line.encode())
-                        flag = tn.read_until(b'#').decode().find(' success')
+                        flag = tn.read_until(b'#', timeout=10).decode(errors='ignore').find(' success')
                         # 备份不成功则报错退出，成功则继续
                         if flag < 0:
                             # 确认telnet会话是否存活
@@ -87,37 +86,34 @@ def itn185_331_download_system(ip, rule):
                     # 清理前次升级失败冗余的镜像文件
                     if r[6] != '':
                         tn.write('dir\n'.encode())  # 显示flash文件列表
-                        flag = tn.read_until(b'#').decode().find(r[6])
-                        # print(flag)
-                        if flag >= 0:
+                        flash = tn.read_until(b'#', timeout=2).decode(errors='ignore')
+                        if r[6] in flash:
                             t60 = datetime.now()
                             cmd_line = 'erase flash/core/%s\n' % r[6]
                             print('[', t60, ']', ip, devtype, '执行', cmd_line)
                             tn.write(cmd_line.encode())
-                            tmp = tn.read_until(b"Please input 'yes' to confirm:").decode()
+                            tmp = tn.read_until(b"Please input 'yes' to confirm:", timeout=2).decode(errors='ignore')
                             # print(tmp)
                             cmd_line1 = 'yes\n'
                             tn.write(cmd_line1.encode())
-                            # print(cmd_line1)
-                            result = tn.read_until(b'#', timeout=600).decode()
-                            print(result.find(' success'))
+                            result = tn.read_until(b'#', timeout=600).decode(errors='ignore')
+                            # print(result.find(' success'))
                             t61 = datetime.now()
-                            if result.find(' success') >= 0:
+                            if ' success' in result:
                                 print('[', t61, ']', ip, devtype, cmd_line, '执行成功，耗时：', t61 - t60)
                             else:
                                 print('[', t61, ']', ip, devtype, cmd_line, '执行失败，耗时：', t61 - t60)
-                                # return  '%s,失败,%s出错\n' % ip %cmd_line
                                 # 此处失败不影响后续操作
                     # 下面开始判断升级bootrom
                     t2 = datetime.now()
-                    if r[2] != '' and devinfo.find('Bootrom Version: %s' % r[2]) < 0:
+                    if r[2] != '' and 'Bootrom Version: %s' % r[2] not in devinfo:
                         cmd_line = 'download bootstrap ftp %s %s %s %s\n' % (ftp_host, ftp_user, ftp_pw, r[4])
                         print('[', t2, ']', ip, devtype, '执行', cmd_line)
                         tn.write(cmd_line.encode())
-                        result1 = tn.read_until(b'#', timeout=180).decode()  # 获取bootrom升级结果
+                        result1 = tn.read_until(b'#', timeout=180).decode(errors='ignore')  # 获取bootrom升级结果
                         # print(result1)
                         t3 = datetime.now()
-                        if result1.find(' success') >= 0:
+                        if ' success' in result1:
                             print('[', t3, ']', ip, devtype, 'BOOTROM下载成功，共耗时 ', t3 - t2)
                         # bootrom升级失败则报错退出
                         else:
@@ -131,31 +127,30 @@ def itn185_331_download_system(ip, rule):
                                 return '%s,失败,telnet连接中断\n' % ip
                     # 下面开始升级system
                     tn.write('dir\n'.encode())
-                    dirlist = tn.read_until(b'#').decode()
-                    flag = dirlist.find(r[5])  # 判断是否有已存在的文件，为后面二次确认做准备
-                    # print(flag)
+                    # 判断是否有已存在的文件，为后面二次确认做准备
+                    dirlist = tn.read_until(b'#', timeout=2).decode(errors='ignore')
                     cmd_line = 'download system ftp %s %s %s %s\n' % (ftp_host, ftp_user, ftp_pw, r[5])
                     t4 = datetime.now()
                     print('[', t4, ']', ip, devtype, 'bootrom版本满足，开始执行', cmd_line)
                     tn.write(cmd_line.encode())
                     # 如果已经有存在的文件，确认覆盖升级
-                    if flag >= 0:
+                    if r[5] in dirlist:
                         sleep(3)
                         tn.write('yes\n'.encode())  # 等待3秒后输入yes二次确认
                     # 获取命令结果
-                    result1 = tn.read_until(b'#', timeout=2700).decode()
+                    result1 = tn.read_until(b'#', timeout=2700).decode(errors='ignore')
                     # print(result1)
                     t5 = datetime.now()
                     # 判断返回，如果含有download system success，则成功，超时抛出失败
-                    if result1.find(' success') >= 0:  # 注意success前有空格，以便区分unsuccessful和successful
+                    if ' success' in result1:  # 注意success前有空格，以便区分unsuccessful和successful
                         # 指定启动文件
                         cmd_line = 'boot next-startup %s \n' % r[5]
                         print('[', t5, ']', ip, devtype, 'system下载成功，耗时', t5 - t4, '，正在执行', cmd_line)
                         tn.write(cmd_line.encode())
-                        result3 = tn.read_until(b'#', timeout=300).decode()
+                        result3 = tn.read_until(b'#', timeout=300).decode(errors='ignore')
                         t6 = datetime.now()
                         # 判断boot next-startup是否成功
-                        if result3.find(' success') >= 0:
+                        if ' success' in result3:
                             print('[', t6, ']', ip, devtype, cmd_line, '执行成功，耗时', t6 - t5)
                             # 判断是否需要擦除旧的镜像文件
                             if r[7] != '':
@@ -164,28 +159,26 @@ def itn185_331_download_system(ip, rule):
                                 # 迭代比较列表中文件名
                                 for e in eraselist:
                                     # 假如存在该文件名则擦除
-                                    if dirlist.find(e) >= 0:
+                                    if e in dirlist:
                                         t6 = datetime.now()
                                         cmd_line = 'erase flash/core/%s\n' % e
                                         print('[', t6, ']', ip, devtype, '执行', cmd_line)
                                         tn.write(cmd_line.encode())
                                         sleep(2)
-                                        cmd_line2 = 'yes\n'
-                                        tn.write(cmd_line2.encode())
+                                        tn.write('yes\n'.encode())
                                         # print(cmd_line)
-                                        tmp = tn.read_until(b'#').decode()
+                                        tmp = tn.read_until(b'#', timeout=10).decode(errors='ignore')
                                         # print(tmp)
                                         t7 = datetime.now()
                                         # 此处擦除成功与否不影响升级结果
-                                        if tmp.find(' success') >= 0:
+                                        if ' success' in tmp:
                                             print('[', t7, ']', ip, devtype, '执行', cmd_line, '成功，耗时：', t7 - t6)
                                         else:
                                             print('[', t7, ']', ip, devtype, '执行', cmd_line, '失败，耗时：', t7 - t6)
                             # 判断是否需要重启激活，只有填写yes才重启，其他值均不重启。注意r[12]作为行尾带有换行符'\n'
-                            if r[12].find('yes') >= 0:
-                                cmd_line = 'write\n'
-                                tn.write(cmd_line.encode())
-                                tn.read_until(b'#')
+                            if 'yes' in r[12]:
+                                tn.write('write\n'.encode())
+                                tn.read_until(b'#', timeout=10)
                                 cmd_line = 'reboot now\n'
                                 print('[', datetime.now(), ']', ip, devtype, '执行', cmd_line)
                                 tn.write(cmd_line.encode())
@@ -276,20 +269,20 @@ def multiprocess_upgrade(p_num):
         if r[2] != '' and r[4] == '':
             print('错误！升级规则表第%d行中定义了bootrom目标版本，未定义bootrom升级文件' % index)
             exit()
-
     # 生成ip列表文件路径
     f2 = os.path.join(home, 'u_ip_list.txt')
     # 尝试读取设备ip列表文件，放入ip_list列表。
     try:
         with open(f2, 'r') as f:
             ip_list = f.read().split()  # 读取的文件切片成设备列表
+            # 利用集合方法去重
+            ip_list = list(set(ip_list))
         while '' in ip_list:
             ip_list.remove('')  # 移除列表中的空行
     # ip列表文件读取错误处理
     except:
         print('错误，设备列表文件名%s不存在或路径不对' % f2)
         exit()
-
     # 结果日志保存目录，如没有，则创建
     f3 = os.path.join(home, 'result')
     if not os.path.exists(f3):
@@ -303,7 +296,6 @@ def multiprocess_upgrade(p_num):
     except:
         print('错误，结果日志文件存放路径/result不存在')
         exit()
-
     # 创建进程池，个数根据PC处理能力适当选择
     p = Pool(p_num)
     # 开启多进程异步升级，回调函数记录结果到log文件
@@ -320,10 +312,10 @@ if __name__ == '__main__':
     # windows的可执行文件，必须添加支持程序冻结，该命令需要在__main__函数下
     freeze_support()
     print('''
-    - ITN185_331批量升级工具v1.2说明
+    - ITN185_331批量升级工具v1.3说明
     - 编写人：莫凡 500264@qq.com
     - 鸣谢：冀文超 提供源代码思路
-    - 版本日期：20190325
+    - 版本日期：20190420
     - 说明：
     1. 本程序用于台式IPRAN设备的自动一键升级，用户不需检查待升级设备类型，程序会自动搜索匹配升级规则，如果匹配不到规则，会报错并继续匹配下一台;
     2. 升级规则通过/upgrade_rule.csv定制。包括匹配设备类型、硬件版本、指定目标bootrom版本和文件、指定目标system版本和文件、是否备份配置、ftp下载账号、是否重启激活等。每种设备一行，详见具体文件。
@@ -343,7 +335,7 @@ if __name__ == '__main__':
     # 解析命令行参数到args类
     args = parser.parse_args()
     # 命令行加-p选项，无人值守静默升级
-    if args.p_num != None:
+    if args.p_num is not None:
         print("进行无人值守静默升级，并发进程数为：", args.p_num)
         multiprocess_upgrade(args.p_num)
     # 如果命令行不加-p选项，进行交互式升级
