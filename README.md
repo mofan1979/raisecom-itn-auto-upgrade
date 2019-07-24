@@ -17,6 +17,7 @@
 12. 如果windows环境运行提示缺少API-MS-Win-Core-Console-L1-1-0.dll运行库，请下载安装[微软常用运行库合集](http://baoku.360.cn/soft/show/appid/104698064)
 
 20190420更新V1.3版本，修复一些telnet会话挂死bug，提升稳定性。
+
 20190724更新V1.4版本，修复擦除flash遗留镜像文件时误报失败的bug。
 
 - 测试64进程并发升级170台iTN331设备只需要28分钟左右。
