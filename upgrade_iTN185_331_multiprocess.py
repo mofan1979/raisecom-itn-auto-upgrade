@@ -1,8 +1,8 @@
 """
-- ITN185_331批量升级工具v1.3说明
+- ITN185_331批量升级工具v1.4说明
 - 编写人：莫凡 500264@qq.com
 - 鸣谢：冀文超 提供源代码思路
-- 版本日期：20190420
+- 版本日期：20190724
 - 说明：
 1. 本脚本用于台式IPRAN设备的自动一键升级，用户不需检查待升级设备类型，脚本会自动搜索匹配升级规则，如果匹配不到规则，会报错并继续匹配下一台;
 2. 升级规则通过/upgrade_rule.csv定制。包括匹配设备类型、硬件版本、指定目标bootrom版本和文件、指定目标system版本和文件、是否备份配置、ftp下载账号、是否重启激活等。每种设备一行，详见具体文件。
@@ -14,6 +14,7 @@
 8. 升级规则可以指定升级前、升级成功后擦除旧版本文件，当然新版本文件名不能用同样的名字，否则会被误擦除！
 9. 目前不支持paf文件升级
 10. 命令行使用“upgrade_iTN185_331_multiprocess.exe -p P_NUM”可实现无人值守静默升级，P_NUM为并发进程数，P_NUM必须大于等于1小于等于99。
+11.设备登录用户名密码为出厂默认。暂不支持用户自定义用户名密码。
 """
 
 import argparse  # 接收命令行参数的库
@@ -96,7 +97,7 @@ def itn185_331_download_system(ip, rule):
                             # print(tmp)
                             cmd_line1 = 'yes\n'
                             tn.write(cmd_line1.encode())
-                            result = tn.read_until(b'#', timeout=600).decode(errors='ignore')
+                            result = tn.read_until(b'#', timeout=180).decode(errors='ignore')
                             # print(result.find(' success'))
                             t61 = datetime.now()
                             if ' success' in result:
@@ -147,7 +148,7 @@ def itn185_331_download_system(ip, rule):
                         cmd_line = 'boot next-startup %s \n' % r[5]
                         print('[', t5, ']', ip, devtype, 'system下载成功，耗时', t5 - t4, '，正在执行', cmd_line)
                         tn.write(cmd_line.encode())
-                        result3 = tn.read_until(b'#', timeout=300).decode(errors='ignore')
+                        result3 = tn.read_until(b'#', timeout=30).decode(errors='ignore')
                         t6 = datetime.now()
                         # 判断boot next-startup是否成功
                         if ' success' in result3:
@@ -167,7 +168,7 @@ def itn185_331_download_system(ip, rule):
                                         sleep(2)
                                         tn.write('yes\n'.encode())
                                         # print(cmd_line)
-                                        tmp = tn.read_until(b'#', timeout=10).decode(errors='ignore')
+                                        tmp = tn.read_until(b'#', timeout=180).decode(errors='ignore')
                                         # print(tmp)
                                         t7 = datetime.now()
                                         # 此处擦除成功与否不影响升级结果
@@ -312,21 +313,22 @@ if __name__ == '__main__':
     # windows的可执行文件，必须添加支持程序冻结，该命令需要在__main__函数下
     freeze_support()
     print('''
-    - ITN185_331批量升级工具v1.3说明
+    - ITN185_331批量升级工具v1.4说明
     - 编写人：莫凡 500264@qq.com
     - 鸣谢：冀文超 提供源代码思路
-    - 版本日期：20190420
+    - 版本日期：20190724
     - 说明：
-    1. 本程序用于台式IPRAN设备的自动一键升级，用户不需检查待升级设备类型，程序会自动搜索匹配升级规则，如果匹配不到规则，会报错并继续匹配下一台;
+    1. 本脚本用于台式IPRAN设备的自动一键升级，用户不需检查待升级设备类型，脚本会自动搜索匹配升级规则，如果匹配不到规则，会报错并继续匹配下一台;
     2. 升级规则通过/upgrade_rule.csv定制。包括匹配设备类型、硬件版本、指定目标bootrom版本和文件、指定目标system版本和文件、是否备份配置、ftp下载账号、是否重启激活等。每种设备一行，详见具体文件。
     3. upgrade_rule.csv、u_ip_list.txt必须和程序文件放在同一目录下，且不能改名。
-    4. 升级时一定要保证itn设备FLASH内存空间足够，否则异常！
+    4. 升级时一定要保证itn设备FLASH内存空间足够，否则异常!
     5. 升级设备ip列表放在/u_ip_list.txt供程序读取设备ip，每行一条ip
     6. 升级结果日志放在/result子目录下，文件名为“日期_时间.csv”，如果/result目录不存在，自动创建
     7. 程序为多进程并行升级，需根据PC性能配置决定并发进程数，数量过多会影响稳定性，ftp服务端程序需要支持高并发下载，推荐使用FileZilla server服务器程序。
     8. 升级规则可以指定升级前、升级成功后擦除旧版本文件，当然新版本文件名不能用同样的名字，否则会被误擦除！
     9. 目前不支持paf文件升级
     10. 命令行使用“upgrade_iTN185_331_multiprocess.exe -p P_NUM”可实现无人值守静默升级，P_NUM为并发进程数，P_NUM必须大于等于1小于等于99。
+    11.设备登录用户名密码为出厂默认。暂不支持用户自定义用户名密码。
     ''')
     # 实例化参数解析器
     parser = argparse.ArgumentParser()
