@@ -1,8 +1,8 @@
 """
-- ITN185_331批量升级工具v1.4说明
+- ITN185_331批量升级工具v1.5说明
 - 编写人：莫凡 500264@qq.com
 - 鸣谢：冀文超 提供源代码思路
-- 版本日期：20190724
+- 版本日期：20190725
 - 说明：
 1. 本脚本用于台式IPRAN设备的自动一键升级，用户不需检查待升级设备类型，脚本会自动搜索匹配升级规则，如果匹配不到规则，会报错并继续匹配下一台;
 2. 升级规则通过/upgrade_rule.csv定制。包括匹配设备类型、硬件版本、指定目标bootrom版本和文件、指定目标system版本和文件、是否备份配置、ftp下载账号、是否重启激活等。每种设备一行，详见具体文件。
@@ -34,9 +34,9 @@ def itn185_331_download_system(ip, rule):
         # 登陆交互
         tn.write('\n'.encode())
         tn.read_until(b'Login:', timeout=2)
-        tn.write('raisecom\n'.encode())
+        tn.write('zhongyingwg\n'.encode())
         tn.read_until(b'Password:', timeout=1)
-        tn.write('raisecom\n'.encode())
+        tn.write('zyWG@2015\n'.encode())
         tn.read_until(b'>', timeout=1)
         tn.write('enable\n'.encode())
         tn.read_until(b'Password:', timeout=1)
@@ -66,15 +66,15 @@ def itn185_331_download_system(ip, rule):
                         cmd_line = 'write\n'
                         print('[', t0, ']', ip, devtype, '执行', cmd_line)
                         tn.write(cmd_line.encode())
-                        tn.read_until(b'#', timeout=5)
+                        r1 = tn.read_until(b'#', timeout=180)
                         ft0 = t0.strftime('%Y%m%d_%H%M%S')
                         cmd_line = 'upload startup-config ftp %s %s %s %s-%s.conf\n' % (
                             ftp_host, ftp_user, ftp_pw, ip, ft0)
                         print('[', datetime.now(), ']', ip, devtype, '执行', cmd_line)
                         tn.write(cmd_line.encode())
-                        flag = tn.read_until(b'#', timeout=10).decode(errors='ignore').find(' success')
+                        r2 = tn.read_until(b'#', timeout=60).decode(errors='ignore')
                         # 备份不成功则报错退出，成功则继续
-                        if flag < 0:
+                        if ' success' not in r2:
                             # 确认telnet会话是否存活
                             try:
                                 tn.close()
@@ -146,9 +146,9 @@ def itn185_331_download_system(ip, rule):
                     if ' success' in result1:  # 注意success前有空格，以便区分unsuccessful和successful
                         # 指定启动文件
                         cmd_line = 'boot next-startup %s \n' % r[5]
-                        print('[', t5, ']', ip, devtype, 'system下载成功，耗时', t5 - t4, '，正在执行', cmd_line)
+                        print('[', t5, ']', ip, devtype, 's1ystem下载成功，耗时', t5 - t4, '，正在执行', cmd_line)
                         tn.write(cmd_line.encode())
-                        result3 = tn.read_until(b'#', timeout=30).decode(errors='ignore')
+                        result3 = tn.read_until(b'#', timeout=120).decode(errors='ignore')
                         t6 = datetime.now()
                         # 判断boot next-startup是否成功
                         if ' success' in result3:
@@ -313,10 +313,10 @@ if __name__ == '__main__':
     # windows的可执行文件，必须添加支持程序冻结，该命令需要在__main__函数下
     freeze_support()
     print('''
-    - ITN185_331批量升级工具v1.4说明
+    - ITN185_331批量升级工具v1.5说明
     - 编写人：莫凡 500264@qq.com
     - 鸣谢：冀文超 提供源代码思路
-    - 版本日期：20190724
+    - 版本日期：20190725
     - 说明：
     1. 本脚本用于台式IPRAN设备的自动一键升级，用户不需检查待升级设备类型，脚本会自动搜索匹配升级规则，如果匹配不到规则，会报错并继续匹配下一台;
     2. 升级规则通过/upgrade_rule.csv定制。包括匹配设备类型、硬件版本、指定目标bootrom版本和文件、指定目标system版本和文件、是否备份配置、ftp下载账号、是否重启激活等。每种设备一行，详见具体文件。
